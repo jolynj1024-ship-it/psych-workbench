@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>心理学工作者个人工作台</title>
+<link rel="stylesheet" href="vendor/tw.css?v=202607273" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<style>
+  body { background: #F5F0EB; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #d8cfc4; border-radius: 4px; }
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+  .toast-in { animation: toastIn .3s ease; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: none;} }
+  input, select, textarea { outline: none; }
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif">正在加载工作台…</div></div>
+
+<!-- 本地依赖（无外部 CDN） -->
+<script src="vendor/react.production.min.js?v=202607273"></script>
+<script src="vendor/react-dom.production.min.js?v=202607273"></script>
+<script src="vendor/chart.umd.min.js?v=202607273"></script>
+
+<!-- 预编译后的业务脚本（顺序即依赖顺序） -->
+<script src="dist3/core.js?v=202607273"></script>
+<script src="dist3/dashboard.js?v=202607273"></script>
+<script src="dist3/workboard.js?v=202607273"></script>
+<script src="dist3/todos.js?v=202607273"></script>
+<script src="dist3/content.js?v=202607273"></script>
+<script src="dist3/ideas.js?v=202607273"></script>
+<script src="dist3/learning.js?v=202607273"></script>
+<script src="dist3/settings.js?v=202607273"></script>
+<script src="dist3/app.js?v=202607273"></script>
+</body>
+</html>

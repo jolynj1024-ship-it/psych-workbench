@@ -1,0 +1,14 @@
+{
+  "name": "psych-workbench",
+  "version": "1.0.0",
+  "description": "心理学工作者个人工作台 - 全栈网站（零依赖 Node 后端 + React 前端）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build/build.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

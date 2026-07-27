@@ -1,0 +1,20 @@
+# Render 一键部署配置
+# 在 Render 后台「New > Web Service > 连接 GitHub 仓库」后，选择本文件即可自动按此配置部署。
+# 注意：Render 免费套餐不含持久磁盘，磁盘需要付费套餐（约 $7/月起）。
+# 若想完全免费且数据不丢，建议改用 Koyeb（免费额度含持久存储），见 DEPLOY.md 路线 B。
+services:
+  - type: web
+    name: psych-workbench
+    runtime: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    envVars:
+      - key: NODE_VERSION
+        value: "18"
+      - key: DB_FILE
+        value: /data/db.json
+    disk:
+      name: psych-data
+      mountPath: /data
+      sizeGB: 1

@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+public/dist/
+public/dist2/
+public/dist3/
+build/twcli.exe
+build/tailwindcss.exe
+build/cloudflared.exe
+build/babel.standalone.min.js
+public/vendor/tailwind.css
