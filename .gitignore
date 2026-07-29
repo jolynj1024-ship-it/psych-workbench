@@ -4,8 +4,11 @@ node_modules/
 public/dist/
 public/dist2/
 public/dist3/
+public/dist4/
+public/dist5/
 build/twcli.exe
 build/tailwindcss.exe
 build/cloudflared.exe
 build/babel.standalone.min.js
 public/vendor/tailwind.css
+db.json

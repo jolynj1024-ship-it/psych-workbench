@@ -1,4 +1,4 @@
-/* 心理学工作者个人工作台 - 后端服务（零依赖，纯 Node.js） */
+/* jolyn的工作台 - 后端服务（零依赖，纯 Node.js） */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -168,7 +168,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('心理学工作者个人工作台已启动:');
+  console.log('jolyn的工作台 已启动:');
   console.log('  本机访问:  http://localhost:' + PORT);
   console.log('  手机访问:  请用同一 Wi-Fi，打开 http://<本机局域网IP>:' + PORT);
 });

@@ -9,7 +9,7 @@ const Babel = require('./babel.standalone.min.js');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const JS_DIR = path.join(__dirname, '..', 'public', 'js');
-const OUT_DIR = path.join(__dirname, '..', 'public', 'dist3');
+const OUT_DIR = path.join(__dirname, '..', 'public', 'dist6');
 try { fs.mkdirSync(OUT_DIR, { recursive: true }); } catch (e) {}
 const FILES = [
   'core', 'dashboard', 'workboard', 'todos', 'content',

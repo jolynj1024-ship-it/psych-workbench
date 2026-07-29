@@ -12,6 +12,48 @@ window.SettingsPage = function SettingsPage({ workTypes, reloadWorkTypes }) {
   const [showExport, setShowExport] = stUseState(false);
   const [syncText, setSyncText] = stUseState('');
   const [importText, setImportText] = stUseState('');
+  const [notifPerm, setNotifPerm] = stUseState(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported');
+  const [canInstall, setCanInstall] = stUseState(false);
+  stUseEffect(() => {
+    const h = () => setCanInstall(!!window.__deferredPrompt);
+    window.addEventListener('pw-installable', h);
+    window.addEventListener('pw-installed', h);
+    setCanInstall(!!window.__deferredPrompt);
+    return () => { window.removeEventListener('pw-installable', h); window.removeEventListener('pw-installed', h); };
+  }, []);
+  const isInstalled = typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches;
+
+  // 云端同步（GitHub）配置
+  const [gh, setGh] = stUseState({
+    enabled: localStorage.getItem('pw_gh_enabled') === '1',
+    token: localStorage.getItem('pw_gh_token') || '',
+    repo: localStorage.getItem('pw_gh_repo') || '',
+    branch: localStorage.getItem('pw_gh_branch') || 'main'
+  });
+  const [ghStatus, setGhStatus] = stUseState('');
+  const [ghBusy, setGhBusy] = stUseState(false);
+  const saveGh = async () => {
+    setGhBusy(true); setGhStatus('');
+    localStorage.setItem('pw_gh_enabled', gh.enabled ? '1' : '0');
+    localStorage.setItem('pw_gh_token', gh.token.trim());
+    localStorage.setItem('pw_gh_repo', gh.repo.trim());
+    localStorage.setItem('pw_gh_branch', (gh.branch.trim() || 'main'));
+    try {
+      await window.GHSync.test();
+      setGhStatus('✅ 连接成功，数据已拉取并启用同步');
+      toast('GitHub 同步已启用', 'success');
+      setTimeout(() => location.reload(), 700);
+    } catch (e) {
+      setGhStatus('❌ 连接失败：' + e.message + '（请检查仓库名 / 令牌权限）');
+      toast(e.message, 'error');
+    } finally { setGhBusy(false); }
+  };
+  const uploadLocal = async () => {
+    setGhBusy(true);
+    try { await window.GHSync.uploadLocal(); toast('本地数据已上传到云端', 'success'); setGhStatus('✅ 本地数据已上传'); }
+    catch (e) { toast(e.message, 'error'); setGhStatus('❌ 上传失败：' + e.message); }
+    finally { setGhBusy(false); }
+  };
 
   stUseEffect(() => { setWt(workTypes || {}); }, [workTypes]);
   stUseEffect(() => { API('/records').then(setRecords).catch(() => { }); }, []);
@@ -66,6 +108,68 @@ window.SettingsPage = function SettingsPage({ workTypes, reloadWorkTypes }) {
 
   return (
     <div className="fade-in space-y-5">
+      {/* 云端同步（GitHub） */}
+      <Card>
+        <h3 className="font-bold text-gray-800 mb-1">☁️ 云端同步（GitHub · 多设备实时）</h3>
+        <p className="text-xs text-gray-400 mb-4">启用后，所有数据集中保存在你 GitHub 仓库的 <code>data.json</code>。手机和电脑打开同一个网址，改一处约 20 秒内其他设备自动刷新。</p>
+        <div className="space-y-3">
+          <label className="flex items-center gap-2 text-sm text-gray-600">
+            <input type="checkbox" checked={gh.enabled} onChange={e => setGh(g => ({ ...g, enabled: e.target.checked }))} className="w-4 h-4" />
+            启用 GitHub 云端同步
+          </label>
+          <Field label="GitHub 仓库（格式：用户名/仓库名）">
+            <Input placeholder="例如 jolynj1024-ship-it/psych-workbench" value={gh.repo} onChange={e => setGh(g => ({ ...g, repo: e.target.value }))} />
+          </Field>
+          <Field label="分支（默认 main）">
+            <Input placeholder="main" value={gh.branch} onChange={e => setGh(g => ({ ...g, branch: e.target.value }))} />
+          </Field>
+          <Field label="访问令牌（Fine-grained PAT，需 Contents 读写权限）">
+            <Input type="password" placeholder="github_pat_..." value={gh.token} onChange={e => setGh(g => ({ ...g, token: e.target.value }))} />
+            <p className="text-[11px] text-gray-400 mt-1">在 GitHub → Settings → Developer settings → Fine-grained tokens 新建，仅授权本仓库的 Contents 读写。<a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noreferrer" className="text-primary underline">去创建</a></p>
+          </Field>
+          <div className="flex flex-wrap gap-2 items-center">
+            <Btn onClick={saveGh} disabled={ghBusy}>💾 保存并连接测试</Btn>
+            <BtnGhost onClick={uploadLocal} disabled={ghBusy}>⬆️ 上传本地暂存到云端</BtnGhost>
+            {ghStatus && <span className="text-xs text-gray-500">{ghStatus}</span>}
+          </div>
+          <p className="text-[11px] text-gray-400">最后同步：{window.GHSync.lastSync() ? new Date(window.GHSync.lastSync()).toLocaleString() : '尚未同步'}</p>
+        </div>
+      </Card>
+
+      {/* 晚间打卡提醒 */}
+      <Card>
+        <h3 className="font-bold text-gray-800 mb-1">🌙 晚间打卡提醒</h3>
+        <p className="text-xs text-gray-400 mb-4">每天到点自动弹出打卡窗口，提醒你记录当天状态与感悟。需保持工作台标签页处于打开状态。</p>
+        <label className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+          <input type="checkbox" checked={localStorage.getItem('pw_remind_enabled') !== '0'} onChange={e => localStorage.setItem('pw_remind_enabled', e.target.checked ? '1' : '0')} className="w-4 h-4" />
+          启用每晚打卡提醒（默认开启）
+        </label>
+        <Field label="提醒时间（24 小时制）">
+          <Select value={Number(localStorage.getItem('pw_remind_hour') || 22)} onChange={e => localStorage.setItem('pw_remind_hour', e.target.value)} className="!w-32">
+            {[17, 18, 19, 20, 21, 22, 23].map(h => <option key={h} value={h}>{String(h).padStart(2, '0') + ':00'}</option>)}
+          </Select>
+        </Field>
+        <div className="mt-1">
+          {notifPerm === 'granted'
+            ? <span className="text-xs text-emerald-600">🔔 系统通知已开启（到点会弹系统提醒）</span>
+            : notifPerm === 'unsupported'
+              ? <span className="text-xs text-gray-400">当前浏览器不支持系统通知</span>
+              : <BtnGhost onClick={async () => { try { const p = await Notification.requestPermission(); setNotifPerm(p); if (p === 'granted') toast('已开启系统通知，到点会弹提醒', 'success'); } catch (e) {} }}>🔔 允许系统通知（让提醒更显眼）</BtnGhost>}
+        </div>
+        <p className="text-[11px] text-gray-400">说明：网页在浏览器完全关闭时无法弹出提醒，请让标签页保持打开；若到点时页面开着，会自动弹出打卡窗口。</p>
+      </Card>
+
+      {/* 安装到设备 */}
+      <Card>
+        <h3 className="font-bold text-gray-800 mb-1">📲 安装到桌面 / 手机</h3>
+        <p className="text-xs text-gray-400 mb-4">把工作台安装成 App：手机「添加到主屏幕」、电脑浏览器点「安装」，之后像原生应用一样直接从图标打开，不必再输入网址。</p>
+        {isInstalled
+          ? <p className="text-sm text-emerald-600">✅ 已安装为独立应用</p>
+          : canInstall
+            ? <Btn onClick={async () => { const ok = await window.promptInstall(); if (!ok) toast('已取消安装', 'info'); }}>📲 点击安装到本设备</Btn>
+            : <p className="text-xs text-gray-400">若未出现「安装」按钮，请在浏览器菜单里选「安装应用 / 添加到主屏幕」（Chrome / Edge / Safari 均支持）。</p>}
+      </Card>
+
       {/* 工作类别自定义 */}
       <Card>
         <h3 className="font-bold text-gray-800 mb-1">🏷️ 工作类别自定义</h3>

@@ -1,7 +1,7 @@
 {
-  "name": "psych-workbench",
+  "name": "jolyn-workbench",
   "version": "1.0.0",
-  "description": "心理学工作者个人工作台 - 全栈网站（零依赖 Node 后端 + React 前端）",
+  "description": "jolyn的工作台 - 心理学工作者个人工作台（零依赖 Node 后端 + React 前端，支持 GitHub 云端同步与每日打卡提醒）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

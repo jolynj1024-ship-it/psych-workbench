@@ -114,6 +114,7 @@ window.Pomodoro = function Pomodoro({ onFinish }) {
 window.DashboardPage = function DashboardPage({ workTypes, userName }) {
   const [records, setRecords] = dsUseState([]);
   const [todos, setTodos] = dsUseState([]);
+  const [checkin, setCheckin] = dsUseState(null);
   const [pomoModal, setPomoModal] = dsUseState(false);
   const [delId, setDelId] = dsUseState(null);
   const [refreshKey, setRefreshKey] = dsUseState(0);
@@ -125,6 +126,12 @@ window.DashboardPage = function DashboardPage({ workTypes, userName }) {
     } catch (e) { }
   };
   dsUseEffect(() => { load(); }, [refreshKey]);
+  dsUseEffect(() => {
+    API('/checkins').then(list => {
+      const t = today();
+      setCheckin((list || []).filter(c => c.date === t).slice(-1)[0] || null);
+    }).catch(() => { });
+  }, [refreshKey]);
 
   const hour = new Date().getHours();
   const greet = hour < 12 ? '早安' : hour < 18 ? '午安' : '晚安';
@@ -193,6 +200,18 @@ window.DashboardPage = function DashboardPage({ workTypes, userName }) {
       </div>
 
       <Pomodoro onFinish={() => { toast('专注完成！记录一下这个番茄吧 🍅', 'info'); setPomoModal(true); }} />
+
+      <Card>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-bold text-gray-800 mb-1">🌙 今日心情打卡</h3>
+            {checkin
+              ? <p className="text-sm text-gray-600 truncate">{checkin.mood}{checkin.note ? ' · ' + checkin.note : ''}</p>
+              : <p className="text-xs text-gray-400">今天还没打卡，记得晚上来记录一下吧</p>}
+          </div>
+          <BtnGhost className="shrink-0" onClick={() => window.dispatchEvent(new CustomEvent('pw-open-checkin'))}>去打卡</BtnGhost>
+        </div>
+      </Card>
 
       <Modal open={pomoModal} title="🍅 番茄钟完成 · 专注工作打卡" onClose={() => setPomoModal(false)}>
         <PunchForm workTypes={workTypes} initial={{ minutes: 25, note: '番茄钟 · 专注工作' }}
