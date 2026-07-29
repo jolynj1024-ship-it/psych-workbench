@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>jolyn的工作台</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<meta name="theme-color" content="#2D9CDB" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="jolyn台" />
+<script>
+  // 捕获浏览器安装提示，供「设置」页按钮触发
+  (function () {
+    window.__deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__deferredPrompt = e;
+      window.dispatchEvent(new CustomEvent('pw-installable'));
+    });
+    window.addEventListener('appinstalled', function () {
+      window.__deferredPrompt = null;
+      window.dispatchEvent(new CustomEvent('pw-installed'));
+    });
+    window.promptInstall = async function () {
+      var p = window.__deferredPrompt;
+      if (!p) return false;
+      p.prompt();
+      var r = { outcome: 'dismissed' };
+      try { r = await p.userChoice; } catch (e) {}
+      window.__deferredPrompt = null;
+      return r.outcome === 'accepted';
+    };
+  })();
+  // 注册 Service Worker（离线 / 秒开）
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+</script>
+<link rel="stylesheet" href="vendor/tw.css?v=202607291" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<style>
+  body { background: #F5F0EB; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #d8cfc4; border-radius: 4px; }
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+  .toast-in { animation: toastIn .3s ease; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-10px);} to { opacity: 1; transform: none;} }
+  input, select, textarea { outline: none; }
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif">正在加载工作台…</div></div>
+
+<!-- 本地依赖（无外部 CDN） -->
+<script src="vendor/react.production.min.js?v=202607291"></script>
+<script src="vendor/react-dom.production.min.js?v=202607291"></script>
+<script src="vendor/chart.umd.min.js?v=202607291"></script>
+
+<!-- 预编译后的业务脚本（顺序即依赖顺序） -->
+<script src="dist6/core.js?v=202607291"></script>
+<script src="dist6/dashboard.js?v=202607291"></script>
+<script src="dist6/workboard.js?v=202607291"></script>
+<script src="dist6/todos.js?v=202607291"></script>
+<script src="dist6/content.js?v=202607291"></script>
+<script src="dist6/ideas.js?v=202607291"></script>
+<script src="dist6/learning.js?v=202607291"></script>
+<script src="dist6/settings.js?v=202607291"></script>
+<script src="dist6/app.js?v=202607291"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "jolyn的工作台",
+  "short_name": "jolyn台",
+  "description": "jolyn的工作台：打卡、待办、内容创作、灵感、学习档案与夜间打卡提醒。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F0EB",
+  "theme_color": "#2D9CDB",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
